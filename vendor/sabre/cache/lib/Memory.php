@@ -1,4 +1,6 @@
-<?php declare (strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Sabre\Cache;
 
@@ -17,8 +19,8 @@ use Psr\SimpleCache\CacheInterface;
  * @author Evert Pot (https://evertpot.com/)
  * @license http://sabre.io/license/
  */
-class Memory implements CacheInterface {
-
+class Memory implements CacheInterface
+{
     protected $cache = [];
 
     use MultipleTrait;
@@ -26,96 +28,109 @@ class Memory implements CacheInterface {
     /**
      * Fetches a value from the cache.
      *
-     * @param string $key     The unique key of this item in the cache.
-     * @param mixed  $default Default value to return if the key does not exist.
+     * @param string $key     the unique key of this item in the cache
+     * @param mixed  $default default value to return if the key does not exist
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
-     * @return mixed The value of the item from the cache, or $default in case of cache miss.
+     *                                                   MUST be thrown if the $key string is not a legal value
+     *
+     * @return mixed the value of the item from the cache, or $default in case of cache miss
      */
-    function get($key, $default = null) {
-
+    public function get($key, $default = null)
+    {
         if (!is_string($key)) {
             throw new InvalidArgumentException('$key must be a string');
         }
-        if (!isset($this->cache[$key])) {
+        if (!isset($this->cache[$key]) || $this->isExpired($key)) {
             return $default;
         }
-        list($expire, $value) = $this->cache[$key];
-        if (!is_null($expire) && $expire < time()) {
-            // If a ttl was set and it expired in the past, invalidate the
-            // cache.
-            $this->delete($key);
-            return $default;
-        }
-        return $value;
 
+        return $this->cache[$key][1];
+    }
+
+    /**
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    private function isExpired(string $key): bool
+    {
+        $expire = $this->cache[$key][0];
+        if (null !== $expire && $expire < time()) {
+            // If a ttl was set and it expired in the past, invalidate the cache.
+            $this->delete($key);
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Persists data in the cache, uniquely referenced by a key with an
      * optional expiration TTL time.
      *
-     * @param string                $key   The key of the item to store.
-     * @param mixed                 $value The value of the item to store, must
-     *                                     be serializable.
-     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item.
+     * @param string                $key   the key of the item to store
+     * @param mixed                 $value the value of the item to store, must
+     *                                     be serializable
+     * @param int|DateInterval|null $ttl   Optional. The TTL value of this item.
      *                                     If no value is sent and the driver
      *                                     supports TTL then the library may set
      *                                     a default value for it or let the
      *                                     driver take care of that.
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
-     * @return bool True on success and false on failure.
+     *                                                   MUST be thrown if the $key string is not a legal value
+     *
+     * @return bool true on success and false on failure
      */
-    function set($key, $value, $ttl = null) {
-
+    public function set($key, $value, $ttl = null)
+    {
         if (!is_string($key)) {
             throw new InvalidArgumentException('$key must be a string');
         }
-        if ($ttl instanceof DateInterval) {
-            $expire = (new DateTime('now'))->add($ttl)->getTimeStamp();
-        } elseif (is_int($ttl) || ctype_digit($ttl)) {
-            $expire = time() + $ttl;
-        } else {
-            $expire = null;
+
+        $expire = null;
+        if (isset($ttl)) {
+            if ($ttl instanceof DateInterval) {
+                $expire = (new DateTime('now'))->add($ttl)->getTimeStamp();
+            } elseif (is_int($ttl) || ctype_digit((string) $ttl)) {
+                $expire = time() + $ttl;
+            }
         }
         $this->cache[$key] = [$expire, $value];
 
         return true;
-
     }
 
     /**
      * Delete an item from the cache by its unique key.
      *
-     * @param string $key The unique cache key of the item to delete.
+     * @param string $key the unique cache key of the item to delete
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
+     *                                                   MUST be thrown if the $key string is not a legal value
+     *
      * @return bool True if the item was successfully removed. False if there was an error.
      */
-    function delete($key) {
-
+    public function delete($key)
+    {
         if (!is_string($key)) {
             throw new InvalidArgumentException('$key must be a string');
         }
         unset($this->cache[$key]);
-        return true;
 
+        return true;
     }
 
     /**
      * Wipes clean the entire cache's keys.
      *
-     * @return bool True on success and false on failure.
+     * @return bool true on success and false on failure
      */
-    function clear() {
-
+    public function clear()
+    {
         $this->cache = [];
-        return true;
 
+        return true;
     }
 
     /**
@@ -127,17 +142,19 @@ class Memory implements CacheInterface {
      * has() will return true and immediately after, another script can remove
      * it making the state of your app out of date.
      *
-     * @param string $key The cache item key.
+     * @param string $key the cache item key
+     *
      * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
+     *                                                   MUST be thrown if the $key string is not a legal value
+     *
      * @return bool
      */
-    function has($key) {
-
+    public function has($key)
+    {
         if (!is_string($key)) {
             throw new InvalidArgumentException('$key must be a string');
         }
-        return isset($this->cache[$key]);
 
+        return isset($this->cache[$key]) && !$this->isExpired($key);
     }
 }

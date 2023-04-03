@@ -8,7 +8,7 @@ class ComposerStaticInitd8d5788b65f708446bfb9c023467b42d
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
@@ -24,7 +24,7 @@ class ComposerStaticInitd8d5788b65f708446bfb9c023467b42d
         'S' => 
         array (
             'Symfony\\Polyfill\\Php72\\' => 23,
-            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
             'Stripe\\' => 7,
             'Sabre\\Cache\\' => 12,
@@ -52,9 +52,9 @@ class ComposerStaticInitd8d5788b65f708446bfb9c023467b42d
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
         array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
         'Symfony\\Polyfill\\Intl\\Idn\\' => 
         array (
@@ -104,12 +104,18 @@ class ComposerStaticInitd8d5788b65f708446bfb9c023467b42d
         ),
     );
 
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInitd8d5788b65f708446bfb9c023467b42d::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInitd8d5788b65f708446bfb9c023467b42d::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInitd8d5788b65f708446bfb9c023467b42d::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInitd8d5788b65f708446bfb9c023467b42d::$classMap;
 
         }, null, ClassLoader::class);
     }
